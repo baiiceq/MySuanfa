@@ -1,0 +1,154 @@
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+typedef long long LL;
+
+const int siz = 8;
+const int N = 1e5+10;
+const LL mod =1e8; 
+
+char ch1[N],ch2[N];
+LL a[N>>2],b[N>>2],s[N>>1];
+int fa,fb,f,la,lb;
+
+int cmp(LL num1[],LL num2[]);
+void pls(LL a1[],LL b[]);
+void mnu(LL a[],LL b[]);
+void print(LL num[]);
+
+void init()
+{
+    scanf(" %s %s", ch1, ch2);
+    if (ch1[0]=='-')fa=1,ch1[0]='0';
+    if (ch2[0]=='-')fb=1,ch2[0]='0';
+    la=strlen(ch1),lb=strlen(ch2);
+    for(int i=la-1;i>=0;i-=siz)
+    {
+        LL pw=1;
+        a[0]++;
+        for (int j = i; j >i-siz && j>=0; j -- )
+        {
+            a[a[0]]+=(ch1[j]^48)*pw;//char^48==char-48
+            pw=(pw<<3)+(pw<<1);//就是乘10,md
+        }
+    }
+    for(int i=lb-1;i>=0;i-=siz)
+    {
+        LL pw=1;
+        b[0]++;
+        for (int j = i; j >i-siz && j>=0; j -- )
+        {
+            b[b[0]]+=(ch2[j]^48)*pw;
+            pw=(pw<<3)+(pw<<1);
+        }
+    }
+}
+
+void print(LL num[])
+{
+    if(num[0]==1 && num[1]==0)f=0;
+    if (f)printf("-"),f=0;
+    printf("%lld",num[num[0]]);
+    for (int i = num[0]-1; i; i -- )printf("%08lld",num[i]);
+    puts("");
+}
+
+int cmp(long long num1[],long long num2[])
+{
+    if(num1[0]>num2[0])return 1;
+    else if(num1[0]<num2[0])return -1;
+    else
+    {
+        for (int i = num1[0]; i >= 1; i -- )
+        {
+            if (num1[i]>num2[i])return 1;
+            if (num1[i]<num2[i])return -1;
+        }
+        return 0;
+    }
+}
+
+void pls(LL a[],LL b[])
+{
+    if (fa^fb)
+    {
+        if (fa)fa^=1,mnu(b,a),fa^=1;
+        else fb^=1,mnu(a,b),fb^=1;
+        return ;
+    }
+    else if(fa&fb)
+    {
+        fa=fb=0;
+        f^=1;
+        pls(a,b);
+        fa=fb=1;
+        return ;
+    }
+    else
+    {
+        s[0]=max(a[0],b[0])+1;
+        for (int i = 1; i <= s[0]; i ++ )
+        {
+            s[i]+=a[i]+b[i];
+            if (s[i]>=mod)
+            {
+                s[i]-=mod;
+                s[i+1]++;
+            }
+        }
+        if (!s[s[0]] && s[0]>1)s[0]--;
+    }
+}
+
+void mnu(LL a[],LL b[])
+{
+    if (fa^fb)
+    {
+        if (fa)fa^=1,f^=1,pls(a,b),fa^=1;
+        else fb^=1,pls(a,b),fb^=1;
+    }
+    else if(fa&fb)
+    {
+        fa=fb=0;
+        mnu(b,a);
+        fa=fb=1;
+    }
+    else
+    {
+        if(cmp(a,b)==-1)swap(a,b),f^=1;
+        s[0]=max(a[0],b[0]);
+        for (int i = 1; i <= s[0]; i ++ )
+        {
+            s[i]+=a[i]-b[i];
+            if (s[i]<0)s[i]+=mod,s[i+1]--;
+        }
+        while(!s[s[0]] && s[0]>1)s[0]--;
+    }
+}
+
+void mul(LL a[],LL b[])
+{
+    if(fa^fb)f^=1;
+    s[0]=a[0]+b[0];
+    for (int i = 1; i <= a[0]; i ++ )
+    {
+        for (int j = 1; j <= b[0]; j ++ )
+        {
+            s[i+j-1]+=a[i]*b[j];
+            if (s[i+j-1]>=mod)s[i+j]+=s[i+j-1]/mod,s[i+j-1]%=mod;
+        }
+    }
+    if (!s[s[0]] && s[0]>1)s[0]--;
+}
+
+int main()
+{
+    init();
+    s[0]=1;
+    mul(a,b);
+    print(s);
+    return 0;
+}
