@@ -7,17 +7,23 @@ using namespace std;
 typedef long long LL;
 
 const int siz = 8;
-const int N = 1e5+10;
+const int N = 2e5+10;
 const LL mod =1e8; 
 
 char ch1[N],ch2[N];
 LL a[N>>2],b[N>>2],s[N>>1];
+LL cp[N>>2],yu[N>>2],lt[N>>2];
 int fa,fb,f,la,lb;
 
 int cmp(LL num1[],LL num2[]);
 void pls(LL a1[],LL b[]);
 void mnu(LL a[],LL b[]);
 void print(LL num[]);
+void div(LL a[],LL b[]);
+void ly(LL num[]);
+void cpy(LL num1[],LL num2[]);
+void ry(LL num[]);
+void clear(LL num[]);
 
 void init()
 {
@@ -89,6 +95,7 @@ void pls(LL a[],LL b[])
     }
     else
     {
+        clear(s);
         s[0]=max(a[0],b[0])+1;
         for (int i = 1; i <= s[0]; i ++ )
         {
@@ -118,6 +125,7 @@ void mnu(LL a[],LL b[])
     }
     else
     {
+        clear(s);
         if(cmp(a,b)==-1)swap(a,b),f^=1;
         s[0]=max(a[0],b[0]);
         for (int i = 1; i <= s[0]; i ++ )
@@ -129,9 +137,34 @@ void mnu(LL a[],LL b[])
     }
 }
 
+void clear(LL num[])
+{
+	for(int i=num[0];i;--i) num[i]=0;
+	num[0]=1;
+}
+
+void ry(LL num[])
+{
+	for(int i=num[0];i;--i){
+		if((num[i]&1)&&i>1) num[i-1]+=mod;//将1借到下一位
+		num[i]>>=1;
+	}if(!num[num[0]]&&num[0]>1) --num[0];
+}
+
+void ly(LL num[])
+{
+	++num[0];
+	for(int i=1;i<=num[0];++i){
+		num[i]<<=1;
+		if(num[i-1]>=mod) num[i-1]-=mod,++num[i];//进位，注意后效性
+	}if(!num[num[0]]&&num[0]>1) --num[0];
+	return;
+}
+
 void mul(LL a[],LL b[])
 {
     if(fa^fb)f^=1;
+    clear(s);
     s[0]=a[0]+b[0];
     for (int i = 1; i <= a[0]; i ++ )
     {
@@ -144,11 +177,42 @@ void mul(LL a[],LL b[])
     if (!s[s[0]] && s[0]>1)s[0]--;
 }
 
+void cpy(LL num1[],LL num2[])
+{
+	for(int i=num1[0];i>num2[0];--i) num1[i]=0;
+	for(int i=0;i<=num2[0];++i) num1[i]=num2[i];
+}
+
+
+void div(LL a[],LL b[])
+{
+    
+    
+    clear(cp);
+    clear(lt);
+    cp[0]=1,cp[1]=1,lt[0]=1;
+    while(cmp(a,b)!=-1)ly(b),ly(cp);
+    while(cp[0]>1 || cp[1])
+    {
+        if(cmp(a,b)!=-1)
+        {
+            mnu(a,b);
+            cpy(a,s);
+            pls(lt,cp);
+            cpy(lt,s);
+        }
+        ry(b),ry(cp);
+    }
+    cpy(s,lt),cpy(lt,a);
+    if (fa^fb)f^=1;
+    else f=0;
+}
+
 int main()
 {
     init();
     s[0]=1;
-    mul(a,b);
-    print(s);
+    div(a,b);
+    print(lt);
     return 0;
 }
