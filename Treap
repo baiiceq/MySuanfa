@@ -1,0 +1,144 @@
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+typedef long long LL;
+
+string op;
+LL x,p;
+
+struct TreeNode *rotateleft(TreeNode* &root);
+struct TreeNode *rotateright(TreeNode* &root);
+void insert(TreeNode* &root, int key, int priority);
+bool find(TreeNode* &root,LL key);
+struct TreeNode *delete1(TreeNode* &root,LL key);
+struct TreeNode *delete2(TreeNode* &root,LL key);
+
+struct TreeNode
+{
+    LL val,pri;
+    TreeNode *l, *r;
+    TreeNode(int _val,int _pri): val(_val), pri(_pri), l(NULL), r(NULL) {}
+}*root;
+
+struct TreeNode *rotateleft(TreeNode* &root)
+{
+    auto s=root->r;
+    root->r=s->l;
+    s->l=root;
+    return s;
+}
+
+struct TreeNode *rotateright(TreeNode* &root)
+{
+    auto s=root->l;
+    root->l=s->r;
+    s->r=root;
+    return s;
+}
+
+void insert(TreeNode* &root, int key, int priority)
+{
+    if (!root)root = new TreeNode(key,priority);
+    else if (key<root->val)
+    {
+        insert(root->l,key,priority);
+        if (root->pri<(root->l)->pri)root=rotateright(root);
+    }
+    else
+    {
+        insert(root->r,key,priority);
+        if (root->pri<(root->r)->pri)root=rotateleft(root);
+    }
+}
+
+bool find(TreeNode* &root,LL key)
+{
+    if(!root)return false;
+    if(x<root->val)return find(root->l,key);
+    else if(x>root->val)return find(root->r,key);
+    return true;
+}
+
+struct TreeNode *delete1(TreeNode* &root,LL key)
+{
+    if (!root)return root;
+    if (key<root->val)root->l=delete1(root->l,key);
+    else if(key>root->val)root->r=delete1(root->r,key);
+    else return delete2(root,key);
+    return root;
+}
+
+struct TreeNode *delete2(TreeNode* &root,LL key)
+{
+    if (!root->l && !root->r)return NULL;
+    else if(!root->l)root=rotateleft(root);
+    else if(!root->r)root=rotateright(root);
+    else
+    {
+        if((root->l)->pri>(root->r)->pri)root=rotateright(root);
+        else  root=rotateleft(root);
+    }
+    return delete1(root,key);
+}
+
+void pre(TreeNode* root)
+{
+    if (!root)return;
+    printf(" %lld",root->val);
+    pre(root->l);
+    pre(root->r);
+}
+ 
+void in(TreeNode* root)
+{
+    if (!root)return;
+    in(root->l);
+    printf(" %lld",root->val);
+    in(root->r);
+}
+ 
+void print(TreeNode* &root)
+{
+    in(root);
+    printf("\n");
+    pre(root);
+    printf("\n");
+}
+ 
+
+int main()
+{
+	TreeNode* root = NULL;
+    int n;
+    cin >> n;
+    while (n--)
+    {
+        
+        cin>>op;
+        if (op=="insert")
+        {
+            cin>>x>>p;
+            insert(root,x,p);
+        }
+        else if(op=="find")
+        {
+            cin>>x;
+            if (find(root,x))printf("yes\n");
+            else printf("no\n");
+        }
+        else if(op=="delete")
+        {
+            cin>>x;
+            delete1(root,x);
+        }
+        else
+        {
+            print(root);
+        }
+    }
+    return 0;
+
+}
